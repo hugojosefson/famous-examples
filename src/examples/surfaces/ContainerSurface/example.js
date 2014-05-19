@@ -46,10 +46,16 @@
  */
 define(function(require, exports, module) {
     var Engine           = require("famous/core/Engine");
+    var Transform        = require("famous/core/Transform");
     var Surface          = require("famous/core/Surface");
     var Modifier         = require("famous/core/Modifier");
     var ContainerSurface = require("famous/surfaces/ContainerSurface");
     var Scrollview       = require("famous/views/Scrollview");
+    var ImageSurface = require("famous/surfaces/ImageSurface");
+    var Easing = require('famous/transitions/Easing');
+    var TweenTransition = require('famous/transitions/TweenTransition');
+    var Transitionable = require('famous/transitions/Transitionable');
+    TweenTransition.registerCurve('inOutExpo', Easing.inOutExpo);
 
     var mainContext = Engine.createContext();
 
@@ -60,27 +66,102 @@ define(function(require, exports, module) {
         }
     });
 
+    var transition = {curve: 'linear', duration: 500};
+    var perspective = [
+        1, 0, 0, 0, // bredd
+        0, 1, 1, 0, // hojd
+        0, 0, 1, 0,
+        0, 0, 0, 1
+     // b, h,
+
+    ];
+
+    // TODO: figure out a matrix which gives some perspective on things.... See Transform for hints.
+
     var surfaces = [];
     var scrollview = new Scrollview();
 
-    var temp;
+//    var temp;
     for (var i = 0; i < 100; i++) {
-        temp = new Surface({
-            size: [undefined, 50],
-            content: 'I am surface: ' + (i + 1),
-            classes: ['red-bg'],
+//        temp = new Surface({
+//            size: [undefined, 50],
+//            content: 'I am surface: ' + (i + 1),
+//            classes: ['red-bg'],
+//            properties: {
+//                textAlign: 'center',
+//                lineHeight: '50px'
+//            }
+//        });
+//        temp.add(new Modifier({origin: [.5, .5]})).add(image);
+
+        var imageContainerSurface = new ContainerSurface({
+            size: [200, 200],
             properties: {
-                textAlign: 'center',
-                lineHeight: '50px'
+                overflow: 'hidden'
             }
         });
 
-        temp.pipe(scrollview);
-        surfaces.push(temp);
+        var rotateModifier = new Modifier({transform : Transform.identity});
+
+        function triggerTransition1(rotateModifier, frontOpacityTransitionable, backOpacityTransitionable) {
+            rotateModifier.setTransform(perspective, transition, function () {
+                frontOpacityTransitionable.set(0);
+                backOpacityTransitionable.set(1);
+                triggerTransition2(rotateModifier, frontOpacityTransitionable, backOpacityTransitionable);
+            });
+        }
+
+        function triggerTransition2(rotateModifier, frontOpacityTransitionable, backOpacityTransitionable) {
+            rotateModifier.setTransform(Transform.identity, transition, function () {
+                triggerTransition3(rotateModifier, frontOpacityTransitionable, backOpacityTransitionable);
+            });
+
+        }
+
+        function triggerTransition3(rotateModifier, frontOpacityTransitionable, backOpacityTransitionable) {
+            rotateModifier.setTransform(perspective, transition, function () {
+                frontOpacityTransitionable.set(1);
+                backOpacityTransitionable.set(0);
+                triggerTransition4(rotateModifier, frontOpacityTransitionable, backOpacityTransitionable);
+            });
+        }
+
+        function triggerTransition4(rotateModifier, frontOpacityTransitionable, backOpacityTransitionable) {
+            rotateModifier.setTransform(Transform.identity, transition, function () {
+                triggerTransition1(rotateModifier, frontOpacityTransitionable, backOpacityTransitionable);
+            });
+
+        }
+
+        var frontImage = new ImageSurface({
+            size: [150, 150]
+        });
+        frontImage.setContent("/content/movie-front.jpg");
+
+        var backImage = new ImageSurface({
+            size: [150, 150]
+        });
+        backImage.setContent("/content/movie-back.jpg");
+
+        var frontOpacityTransitionable = new Transitionable(1);
+        var backOpacityTransitionable = new Transitionable(0);
+        var frontOpacityModifier = new Modifier({opacity: frontOpacityTransitionable});
+        var backOpacityModifier = new Modifier({opacity: backOpacityTransitionable});
+
+        var rotatedContainer = imageContainerSurface.add(new Modifier({origin: [.5, .5]})).add(rotateModifier);
+        rotatedContainer.add(frontOpacityModifier).add(frontImage);
+        rotatedContainer.add(backOpacityModifier).add(backImage);
+
+        imageContainerSurface.pipe(scrollview);
+        surfaces.push(imageContainerSurface);
+
+        triggerTransition1(rotateModifier, frontOpacityTransitionable, backOpacityTransitionable);
+
+
     }
 
     scrollview.sequenceFrom(surfaces);
     container.add(scrollview);
 
-    mainContext.add(new Modifier({origin: [.5, .5]})).add(container);
+    mainContext.add(new Modifier({origin: [.5, .5]})).add(scrollview);
 });
