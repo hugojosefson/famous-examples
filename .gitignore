@@ -3,3 +3,4 @@ build*
 build0*
 localS3*
 .DS_Store
+/.idea/
