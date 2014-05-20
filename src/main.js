@@ -3,7 +3,7 @@ define(function(require, exports, module) {
 
     // require('examples/core/Context/example');
     // require('examples/core/Context/context-in-existing-element');
-    // require('examples/core/Context/setting-perspective');
+//    require('examples/core/Context/setting-perspective');
     // require('examples/core/Engine/example');
     // require('examples/core/EventHandler/example');
     // require('examples/core/EventHandler/trigger');
@@ -45,14 +45,14 @@ define(function(require, exports, module) {
     // require('examples/math/Vector/example');
 //    require('examples/modifiers/Draggable/example');
 //    require('examples/modifiers/ModifierChain/example');
-    require('examples/surfaces/ContainerSurface/example');
+//    require('examples/surfaces/ContainerSurface/example');
 //    require('examples/surfaces/ImageSurface/example');
     // require('examples/surfaces/InputSurface/example');
 //    require('examples/transitions/Easing/example');
 //    require('examples/transitions/SnapTransition/example');
     // require('examples/transitions/SpringTransition/example');
     // require('examples/transitions/Transitionable/example');
-//    require('examples/transitions/TransitionableTransform/example');
+    require('examples/transitions/TransitionableTransform/example');
     // require('examples/transitions/TweenTransition/example');
     // require('examples/transitions/WallTransition/example');
     // require('examples/utilities/KeyCodes/example');
