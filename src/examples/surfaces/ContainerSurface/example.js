@@ -46,16 +46,16 @@
  */
 define(function(require, exports, module) {
     var Engine           = require("famous/core/Engine");
-    var Transform        = require("famous/core/Transform");
     var Surface          = require("famous/core/Surface");
     var Modifier         = require("famous/core/Modifier");
+    var Transform        = require("famous/core/Transform");
     var ContainerSurface = require("famous/surfaces/ContainerSurface");
     var Scrollview       = require("famous/views/Scrollview");
     var ImageSurface = require("famous/surfaces/ImageSurface");
     var Easing = require('famous/transitions/Easing');
     var TweenTransition = require('famous/transitions/TweenTransition');
     var Transitionable = require('famous/transitions/Transitionable');
-    TweenTransition.registerCurve('inOutExpo', Easing.inOutExpo);
+    TweenTransition.registerCurve('inQuad', Easing.inQuad);
 
     var mainContext = Engine.createContext();
 
@@ -63,20 +63,12 @@ define(function(require, exports, module) {
         size: [400, 400],
         properties: {
             overflow: 'hidden'
+//            perspective: '500px'
         }
     });
 
-    var transition = {curve: 'linear', duration: 500};
-    var perspective = [
-        1, 0, 0, 0, // bredd
-        0, 1, 1, 0, // hojd
-        0, 0, 1, 0,
-        0, 0, 0, 1
-     // b, h,
-
-    ];
-
-    // TODO: figure out a matrix which gives some perspective on things.... See Transform for hints.
+    var transition = {curve: 'inQuad', duration: 500};
+    var rotateMatrix = Transform.rotateX(Math.PI/2);
 
     var surfaces = [];
     var scrollview = new Scrollview();
@@ -97,14 +89,15 @@ define(function(require, exports, module) {
         var imageContainerSurface = new ContainerSurface({
             size: [200, 200],
             properties: {
-                overflow: 'hidden'
+//                overflow: 'hidden'
+                perspective: '500px'
             }
         });
 
         var rotateModifier = new Modifier({transform : Transform.identity});
 
         function triggerTransition1(rotateModifier, frontOpacityTransitionable, backOpacityTransitionable) {
-            rotateModifier.setTransform(perspective, transition, function () {
+            rotateModifier.setTransform(rotateMatrix, transition, function () {
                 frontOpacityTransitionable.set(0);
                 backOpacityTransitionable.set(1);
                 triggerTransition2(rotateModifier, frontOpacityTransitionable, backOpacityTransitionable);
@@ -119,7 +112,7 @@ define(function(require, exports, module) {
         }
 
         function triggerTransition3(rotateModifier, frontOpacityTransitionable, backOpacityTransitionable) {
-            rotateModifier.setTransform(perspective, transition, function () {
+            rotateModifier.setTransform(rotateMatrix, transition, function () {
                 frontOpacityTransitionable.set(1);
                 backOpacityTransitionable.set(0);
                 triggerTransition4(rotateModifier, frontOpacityTransitionable, backOpacityTransitionable);
